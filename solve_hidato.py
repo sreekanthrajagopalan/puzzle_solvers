@@ -22,20 +22,19 @@ def solve_puzzle(model: cp.CpModel, data: List[List]):
             else:
                 if val == "?":
                     node_of_cell[(i, j)] = node
-                    u[node] = model.NewIntVar(lb=2, ub=num_nodes, name=f"U({node})")
-                    node += 1
+                    u[node] = model.NewIntVar(lb=2, ub=num_nodes - 1, name=f"U({node})")
                 else:
                     node_of_cell[(i, j)] = node
                     u[node] = model.NewIntVar(
-                        lb=int(data[i][j]), ub=int(data[i][j]), name=f"U({node})"
+                        lb=int(val), ub=int(val), name=f"U({node})"
                     )
-                    if int(data[i][j]) == num_nodes:
+                    if int(val) == 1:
                         source = (i, j)
                         source_node = node
-                    elif int(data[i][j]) == 1:
+                    elif int(val) == num_nodes:
                         target = (i, j)
                         target_node = node
-                    node += 1
+                node += 1
 
     # find adjacency
     neighbors = {}
@@ -56,7 +55,7 @@ def solve_puzzle(model: cp.CpModel, data: List[List]):
                 and data[i - 1][j + 1] != "X"
             ):
                 node_neighbors.append(node_of_cell[(i - 1, j + 1)])
-            (i, j) and (i, j + 1)
+            # (i, j) and (i, j + 1)
             if j + 1 in range(0, len(data[i])) and data[i][j + 1] != "X":
                 node_neighbors.append(node_of_cell[(i, j + 1)])
             # (i,j) and (i+1,j+1)
@@ -104,9 +103,9 @@ def solve_puzzle(model: cp.CpModel, data: List[List]):
     for i in range(1, num_nodes + 1):
         model.Add(sum(x[(i, j)] for j in neighbors[i]) == 1)
         model.Add(sum(x[(j, i)] for j in neighbors[i]) == 1)
-    for i in range(2, num_nodes + 1):
-        for j in range(2, num_nodes + 1):
-            if j in neighbors[i]:
+    for i in range(1, num_nodes + 1):
+        if i != target_node:
+            for j in neighbors[i]:
                 model.Add(u[i] - u[j] + 1 <= (num_nodes - 1) * (1 - x[(i, j)]))
     # redundant constraint
     model.AddAllDifferent([u[i] for i in range(1, num_nodes + 1)])
@@ -115,6 +114,7 @@ def solve_puzzle(model: cp.CpModel, data: List[List]):
     solver = cp.CpSolver()
     solver.solve(model)
     print(solver.status_name())
+    print(solver.wall_time)
 
     return solver, u, node_of_cell
 
