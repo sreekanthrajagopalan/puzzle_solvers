@@ -76,6 +76,7 @@ def solve_puzzle(model: cp.CpModel, vars: List, specs: Dict):
     solver = cp.CpSolver()
     solver.solve(model)
     print(solver.status_name())
+    print(solver.wall_time)
 
     return solver
 

@@ -43,6 +43,7 @@ def solve_puzzle(model: cp.CpModel, data: List[List]):
     solver = cp.CpSolver()
     solver.solve(model)
     print(solver.status_name())
+    print(solver.wall_time)
 
     return solver, vars
 
