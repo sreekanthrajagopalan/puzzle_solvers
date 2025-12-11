@@ -168,3 +168,6 @@ data/*
 !data/hidato/20240610*.dat
 !data/kakuro/20240609*.dat
 !data/sudoku/20240609*.dat
+!data/sudoku/20240609*.dat
+!data/knights_tour/5x12*.png
+!data/knights_tour/8x8*.png
